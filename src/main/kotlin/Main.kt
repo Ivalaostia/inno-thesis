@@ -5,28 +5,38 @@ import org.graphstream.graph.implementations.SingleGraph
 import java.io.File
 import java.util.*
 
-/**
- * @author kitttn
- */
+var num = 0
+
+var connNum = 1
 
 val graph = SingleGraph("Test graph")
-var num = 0
-var connNum = 1
-val percentageCommunicating = .15
-val chanceToConnect = 0
+
 val routes = mutableMapOf<Int, MutableList<Int>>()
+
+/** connections inside city */
+val percentageCommunicating = .15
+
+/** connections between cities, 0 is only one */
+val chanceToConnect = 0
+
+/** generate same random graphs */
 var rand = Random(40)
 
 fun main(args: Array<String>) {
-    generateGraph(File("cities_falloutnv"))
+
+    // generateGraph(File("cities_fallout4"))
+    generateGraph(File("test_graph"))
+
     graph.display()
 
     // TODO: simulation with trust for thesis / journal
-    // TODO:
+
 }
 
 fun getCommunicatorsFromCities(cities: List<List<GraphNode>>): List<List<GraphNode>> {
+
     val npcs = mutableListOf<List<GraphNode>>()
+
     for (town in cities) {
         // getting number of communicators
         val comms = Math.ceil(percentageCommunicating * town.size)
@@ -47,6 +57,7 @@ fun getCommunicatorsFromCities(cities: List<List<GraphNode>>): List<List<GraphNo
 }
 
 fun connectCities(communicators: List<List<GraphNode>>) {
+
     for (i in 0 until communicators.size) {
         // making a guaranteed link from this town to another
         val linkFrom = i
@@ -71,6 +82,7 @@ fun connectCities(communicators: List<List<GraphNode>>) {
 }
 
 fun connect(from: GraphNode, to: GraphNode): Boolean {
+
     return try {
         graph.addEdge<Edge>("edge${num++}", from.name, to.name)
         addEdge(from.id, to.id)
@@ -79,6 +91,7 @@ fun connect(from: GraphNode, to: GraphNode): Boolean {
     } catch (e: Exception) {
         false
     }
+
 }
 
 fun probablyConnect(from: GraphNode, to: GraphNode): Boolean {
@@ -89,6 +102,7 @@ fun probablyConnect(from: GraphNode, to: GraphNode): Boolean {
 }
 
 fun buildCityConnections(allCities: List<GraphNode>) {
+
     val connected = mutableListOf<GraphNode>()
     val disconnected = allCities.toMutableList()
 
@@ -114,9 +128,12 @@ fun buildCityConnections(allCities: List<GraphNode>) {
 fun <T> List<T>.getRandomElement(rand: Random) = this[rand.nextInt(this.size)]
 
 fun generateGraph(f: File) {
+
     graph.clear()
+
     connNum = 1
     rand = Random(40)
+
     val buff = Scanner(f)
     val cities = mutableListOf<List<GraphNode>>()
     var cityName = buff.nextLine()
@@ -125,6 +142,7 @@ fun generateGraph(f: File) {
     var num = 0
 
     val addCity = {
+
         if (oneTown.size != 0) {
             oneTown.forEach {
                 val node = graph.addNode<Node>(it.name)
@@ -134,6 +152,7 @@ fun generateGraph(f: File) {
             buildCityConnections(oneTown)
             oneTown.clear()
         }
+
     }
 
     while (buff.hasNextLine()) {
@@ -145,6 +164,7 @@ fun generateGraph(f: File) {
             oneTown += GraphNode(num++, line, cityName)
         }
     }
+
     addCity()
 
     val all = getCommunicatorsFromCities(cities)

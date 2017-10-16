@@ -203,6 +203,16 @@ class TestModel {
     }
 
     @Test
+    fun testTestGraph30Times() {
+        val startFrom = 1
+        val func = { generateGraph(File("test_graph")) }
+        testSmallWorld30Times(startFrom, { func() }, 1.0)
+        testSmallWorld30Times(startFrom, { func() }, .75)
+        testSmallWorld30Times(startFrom, { func() }, .5)
+        testSmallWorld30Times(startFrom, { func() }, .25)
+    }
+
+    @Test
     fun testFallout30Times() {
         val startFrom = 72
         val func = { generateGraph(File("cities_falloutnv")) }
