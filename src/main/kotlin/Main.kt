@@ -5,22 +5,26 @@ import org.graphstream.graph.implementations.SingleGraph
 import java.io.File
 import java.util.*
 
-var num = 0
+/** generate same random graphs */
+var rand = Random() // 40
 
-var connNum = 1
-
+/** main graph */
 val graph = SingleGraph("Test graph")
 
+/** routes */
 val routes = mutableMapOf<Int, MutableList<Int>>()
 
-/** connections inside city */
+/** connections inside city?? */
 val percentageCommunicating = .15
 
 /** connections between cities, 0 is only one */
-val chanceToConnect = 0
+val chanceToConnect = 1.0
 
-/** generate same random graphs */
-var rand = Random(40)
+/** ??? */
+var connNum = 1
+
+/** */
+var num = 0
 
 fun main(args: Array<String>) {
 
@@ -38,11 +42,13 @@ fun getCommunicatorsFromCities(cities: List<List<GraphNode>>): List<List<GraphNo
     val npcs = mutableListOf<List<GraphNode>>()
 
     for (town in cities) {
+
         // getting number of communicators
         val comms = Math.ceil(percentageCommunicating * town.size)
         // println("Selecting $comms from city with population=${town.size}...")
         val townCommunicators = mutableListOf<GraphNode>()
         val mutTowns = town.toMutableList()
+
         for (i in 1..comms.toInt()) {
             val elem = mutTowns.getRandomElement(rand)
             mutTowns -= elem
@@ -50,15 +56,18 @@ fun getCommunicatorsFromCities(cities: List<List<GraphNode>>): List<List<GraphNo
         }
 
         npcs += townCommunicators
+
     }
 
     // println("List of npcs: $npcs")
     return npcs
+
 }
 
 fun connectCities(communicators: List<List<GraphNode>>) {
 
     for (i in 0 until communicators.size) {
+
         // making a guaranteed link from this town to another
         val linkFrom = i
         val townFrom = communicators[linkFrom]
@@ -78,7 +87,9 @@ fun connectCities(communicators: List<List<GraphNode>>) {
         }
 
         // println("Connected ${connected}")
+
     }
+
 }
 
 fun connect(from: GraphNode, to: GraphNode): Boolean {
@@ -95,10 +106,13 @@ fun connect(from: GraphNode, to: GraphNode): Boolean {
 }
 
 fun probablyConnect(from: GraphNode, to: GraphNode): Boolean {
+
     val prob = rand.nextDouble()
+
     return if (prob < chanceToConnect)
         connect(from, to)
     else false
+
 }
 
 fun buildCityConnections(allCities: List<GraphNode>) {
@@ -107,24 +121,31 @@ fun buildCityConnections(allCities: List<GraphNode>) {
     val disconnected = allCities.toMutableList()
 
     while (disconnected.isNotEmpty()) {
+
         val node = disconnected.getRandomElement(rand)
 
         val howManyToAttach = if (rand.nextDouble() + connNum > connNum + 0.5) connNum else connNum + 1
+
         if (connected.size >= howManyToAttach) {
+
             // println("Attaching $howManyToAttach nodes...")
             val copy = connected.toMutableList()
+
             for (counter in 1..howManyToAttach) {
                 val attachTo = copy.getRandomElement(rand)
                 copy -= attachTo
                 connect(node, attachTo)
             }
+
         }
 
         connected += node
         disconnected -= node
+
     }
 }
 
+// TODO: should be improved
 fun <T> List<T>.getRandomElement(rand: Random) = this[rand.nextInt(this.size)]
 
 fun generateGraph(f: File) {
@@ -156,33 +177,42 @@ fun generateGraph(f: File) {
     }
 
     while (buff.hasNextLine()) {
+
         val line = buff.nextLine()
+
         if (line.isEmpty()) {
             addCity()
             cityName = buff.nextLine()
         } else {
             oneTown += GraphNode(num++, line, cityName)
         }
+
     }
 
     addCity()
 
     val all = getCommunicatorsFromCities(cities)
+
     connNum = 0
+
     //buildCityConnections(all)
     connectCities(all)
     // println(cities.reduce { l1, l2 -> l1 + l2 }.map { "${it.id} = ${it.name} (${it.city})" })
 
     buff.close()
+
 }
 
 fun addEdge(from: Int, to: Int) {
+
     if (routes[from] == null)
         routes[from] = mutableListOf()
     routes[from]?.add(to)
+
 }
 
 fun createOblivion() {
+
     routes.clear()
 
     val gen = RandomGenerator(6.0)
@@ -202,9 +232,13 @@ fun createOblivion() {
         addEdge(from, to)
         addEdge(to, from)
     }
+
     println(routes)
+
 }
 
 data class GraphNode(val id: Int, val name: String, val city: String) {
+
     override fun toString(): String = "{$id}"
+
 }
