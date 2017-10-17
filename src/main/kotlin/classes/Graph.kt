@@ -36,6 +36,14 @@ open class Graph(val id: String) {
 
 }
 
+
+data class GraphNode(val id: Int, val name: String, val city: String) {
+
+    override fun toString(): String = "{$id}"
+
+}
+
+
 data class Checker(val id: Int, val inGraph: Boolean)
 
 class Vertex(val id: Int, val connections: List<Int>) {
